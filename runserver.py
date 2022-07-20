@@ -1,6 +1,10 @@
 import pymysql
 from flask import Flask
 
+from model.FoodDao import FoodDao
+from service.FoodService import FoodService
+from view import create_endpoints
+
 
 class Services:
     pass
@@ -22,12 +26,20 @@ def create_app(test_config=None):
                              db=app.config['DATABASE'], charset='utf8', port=app.config['PORT'])
 
     cur = database.cursor()
-    cur.execute("select * from record")
-    while(True):
-        row = cur.fetchone() #row에 커서(테이블 셀렉트)를 한줄 입력하고 다음줄로 넘어감
-        if row == None:
-            break
-        print(row)
+
+    # Persistence Layer
+    foodDao = FoodDao(cur)
+
+    # Businsess Layer
+    services = Services
+    services.foodService = FoodService(foodDao)
+
+    #cur.execute("select * from record")
+    #while(True):
+    #    row = cur.fetchone() #row에 커서(테이블 셀렉트)를 한줄 입력하고 다음줄로 넘어감
+    #    if row == None:
+    #        break
+    #    print(row)
 
     ## Persistenace Layer
 
@@ -35,6 +47,10 @@ def create_app(test_config=None):
 
 
     ## 엔드포인트들을 생성
-    #create_endpoints(app, services)
+    create_endpoints(app, services)
 
     return app
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run(host='0.0.0.0', port=5000)
