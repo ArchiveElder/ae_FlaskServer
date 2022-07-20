@@ -18,9 +18,15 @@ class CustomJSONEncoder(JSONEncoder):
 def create_endpoints(app, services):
     app.json_encoder = CustomJSONEncoder
 
+    foodService = services.foodService
+
     @app.route("/ping", methods=['GET'])
     def ping():
         return "pong"
+
+    @app.route("/api/foodrecommend", methods=['POST'])
+    def recommend():
+        return foodService.foodRecommend(request.get_json()['ingredients'])
 
 
 
