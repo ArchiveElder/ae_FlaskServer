@@ -2,7 +2,9 @@ import pymysql
 from flask import Flask
 
 from model.FoodDao import FoodDao
+from model.FoodClassDao import FoodClassDao
 from service.FoodService import FoodService
+from service.FoodClassService import FoodClassService
 from view import create_endpoints
 
 
@@ -29,10 +31,12 @@ def create_app(test_config=None):
 
     # Persistence Layer
     foodDao = FoodDao(cur)
+    foodclassDao = FoodClassDao(cur)
 
     # Businsess Layer
     services = Services
     services.foodService = FoodService(foodDao)
+    services.foodClassService = FoodClassService(foodclassDao)
 
     #cur.execute("select * from record")
     #while(True):
