@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 my_model = load_model('./trainedModel/model_trained.h5')
-food_list = []
+
 class FoodClassDao:
 
     def __init__(self, database):
@@ -13,6 +13,7 @@ class FoodClassDao:
 
 
     def predictFood(self, filename):
+        food_list = []
         fl = self.db.execute("SELECT * FROM food101")
         print(">>food list (from RDS) is :")
         while (True):
@@ -20,6 +21,7 @@ class FoodClassDao:
             if row == None:
                 break
             food_list.append(row[1])
+
 
         print(food_list)
 
