@@ -52,7 +52,7 @@ def create_app(test_config=None):
 
     ## 엔드포인트들을 생성
     create_endpoints(app, services)
-
+    database.close()
     return app
 
 if __name__ == "__main__":
