@@ -1,16 +1,11 @@
 import json
-
-from sqlalchemy import text
 import pandas as pd
-import numpy as np
 from collections import OrderedDict
 
 from model.JaccardSimilarity import jaccard_similarity
 
 
 class FoodDao:
-    def __init__(self, database):
-        self.db = database
 
     def foodRecommend(self, ingredients):
         data = pd.read_csv("./dataset/ingredients.csv")
