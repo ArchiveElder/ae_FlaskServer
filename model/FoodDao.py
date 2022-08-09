@@ -27,7 +27,7 @@ class FoodDao:
         result.sort(key=lambda x:-x[0])
 
         column_names = ["result", "id", "dish", "food", "recipe_url"]
-        df = pd.DataFrame(result, index=[i for i in range(1, 182)], columns=column_names)
+        df = pd.DataFrame(result, index=[i for i in range(1, data['id'].count())], columns=column_names)
         foods = df.head(3)['dish'].tolist()
         recipes = df.head(3)['recipe_url'].tolist()
         jsonData = OrderedDict()
