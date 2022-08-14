@@ -6,7 +6,8 @@ import numpy as np
 import os
 import config
 
-my_model = load_model('./trainedModel/model_trained.h5')
+#my_model = load_model('./trainedModel/model_trained.h5')   #food101
+my_model = load_model('./trainedModel/trained_model.h5')    #모델 교체
 
 class FoodClassDao:
     def predictFood(self, filename):
@@ -16,20 +17,14 @@ class FoodClassDao:
         # cursor object create
         cur = database.cursor()
 
-        food_list = []
-        fl = cur.execute("SELECT * FROM food101")
-        #print(">>food list (from RDS) is :")
+        foodList = []
+        fl = cur.execute("SELECT * FROM food276")
         while (True):
             row = cur.fetchone()
             if row == None:
                 break
-            food_list.append(row[1])
+            foodList.append(row[1])
 
-        # Cursor obejct , Databse Connection closing
-        cur.close()
-        database.close()
-
-        #print(food_list)
 
         print('>>uploaded filename (from USER) is : ' + filename)
 
@@ -41,17 +36,29 @@ class FoodClassDao:
         pred = my_model.predict(img)
         index = np.argmax(pred)
 
-        food_list.sort()
-        pred_value = food_list[index]
-        print('>>classification result is  : ' +pred_value)
+        foodList.sort()
+        pred_value = foodList[index]
+
+        fl = cur.execute("SELECT * FROM food276 f where f.class = %s", pred_value)
+        while (True):
+            row = cur.fetchone()
+            if row == None:
+                break
+            food_id = row[2]
+
+        print('>>classification result is  : ' + pred_value + "  and food_id(fk) is " + str(food_id))
+
+        # Cursor obejct , Databse Connection closing
+        cur.close()
+        database.close()
 
         if os.path.exists('./static/'+filename):
             os.remove('./static/'+filename)
             print('>>파일이 로컬에서 제거되었습니다.<<<')
 
-        return pred_value
+        return pred_value, food_id
 
-    def foodNutrient(self,food_type):
+    def foodNutrient(self, food_id):
         # databse connect
         database = pymysql.connect(host=config.HOST, user=config.USER, password=config.PASSWORD,
                                    db=config.DATABASE, charset='utf8', port=config.PORT)
@@ -59,21 +66,22 @@ class FoodClassDao:
         cur = database.cursor()
 
         nutrientDto={}
-        sql = "SELECT * FROM nutrient101 WHERE food_type = %s"
-        cur.execute(sql,food_type)
+        sql = "SELECT * FROM food WHERE food_id = %s"
+        cur.execute(sql, food_id)
         while (True):
             row = cur.fetchone()
             if row == None:
                 break
 
-            nutrientDto['name']=row[2]
-            nutrientDto['capacity'] = row[3]
-            nutrientDto['calory'] = row[4]
-            nutrientDto['carb'] = row[5]
-            nutrientDto['pro'] = row[6]
-            nutrientDto['fat'] = row[7]
+            nutrientDto['name']=row[1]
+            nutrientDto['capacity'] = row[2]
+            nutrientDto['calory'] = row[3]
+            nutrientDto['carb'] = row[4]
+            nutrientDto['pro'] = row[5]
+            nutrientDto['fat'] = row[6]
 
         #Cursor obejct , Databse Connection closing
         cur.close()
         database.close()
+
         return json.dumps(nutrientDto, ensure_ascii=False, indent=4)
