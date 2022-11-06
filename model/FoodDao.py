@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import random
 from collections import OrderedDict
 
 from model.JaccardSimilarity import jaccard_similarity
@@ -14,20 +15,36 @@ class FoodDao:
         result = []
         #ingredients = ingredients.split(' ')
 
-        for index in range(0, data['id'].count() - 1) :
-            list = data['food'][index].split(" ")
-            a = []
-            a.append(jaccard_similarity(ingredients, list))
-            a.append(data['id'][index])
-            a.append(data['dish'][index])
-            a.append(data['food'][index])
-            a.append(data['recipe_url'][index])
-            result.append(a)
+        if len(ingredients) == 0 :
+            for index in range(0, data['id'].count() - 1):
+                a = []
+                a.append(data['id'][index])
+                a.append(data['dish'][index])
+                a.append(data['food'][index])
+                a.append(data['recipe_url'][index])
+                result.append(a)
 
-        result.sort(key=lambda x:-x[0])
+            list2 = random.sample(result, len(result))
 
-        column_names = ["result", "id", "dish", "food", "recipe_url"]
-        df = pd.DataFrame(result, index=[i for i in range(1, data['id'].count())], columns=column_names)
+            column_names = ["id", "dish", "food", "recipe_url"]
+            df = pd.DataFrame(list2, index=[i for i in range(1, data['id'].count())], columns=column_names)
+        else :
+            for index in range(0, data['id'].count() - 1):
+                list = data['food'][index].split(" ")
+                a = []
+                a.append(jaccard_similarity(ingredients, list))
+                a.append(data['id'][index])
+                a.append(data['dish'][index])
+                a.append(data['food'][index])
+                a.append(data['recipe_url'][index])
+                result.append(a)
+
+            result.sort(key=lambda x: -x[0])
+
+            column_names = ["result", "id", "dish", "food", "recipe_url"]
+            df = pd.DataFrame(result, index=[i for i in range(1, data['id'].count())], columns=column_names)
+
+
         foods = df.head(3)['dish'].tolist()
         recipes = df.head(3)['recipe_url'].tolist()
         jsonData = OrderedDict()
